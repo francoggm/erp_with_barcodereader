@@ -31,7 +31,7 @@ const Product = conn.define('product', {
         type: sequelize.STRING(30),
     },
     price: {
-        type: sequelize.DECIMAL(10, 2),
+        type: sequelize.FLOAT(10, 2),
         allowNull: false
     },
     description: {
