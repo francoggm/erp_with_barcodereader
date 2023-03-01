@@ -14,10 +14,10 @@ module.exports = {
             .catch(() => res.status(400).send({error: "Error getting product"}));
     },
 
-    getAll: (req, res, next) => {
+    getAllProducts: (req, res, next) => {
         models.Product.findAll()
             .then((products) => {
-                res.json(products);
+                res.send(products); 
             })
             .catch(() => res.status(400).send({error: "Error getting products"}));
     },

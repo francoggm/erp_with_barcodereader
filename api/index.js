@@ -1,9 +1,20 @@
 const express = require("express");
-const app = express();
+const cors = require("cors");
 const productRoute = require("./routes/Product");
 
+const app = express();
+
 app.use(express.json());
+app.use((req, res, next) => {
+	//Qual site tem permissão de realizar a conexão, no exemplo abaixo está o "*" indicando que qualquer site pode fazer a conexão
+    res.header("Access-Control-Allow-Origin", "*");
+	//Quais são os métodos que a conexão pode realizar na API
+    res.header("Access-Control-Allow-Methods", 'GET,PUT,POST,DELETE');
+    app.use(cors());
+    next();
+});
+
 
 app.use("/v1", productRoute);
 
-app.listen(8080, () => console.log("Running"));
+app.listen(8080, "127.0.0.1", () => console.log("Running"));

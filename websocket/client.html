@@ -21,10 +21,19 @@
     btnStartReader = document.querySelector("#startReader");
     btnCloseReader = document.querySelector("#closeReader");
 
+    function getProductById(id) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", `http://127.0.0.1:8080/v1/product/${parseInt(id)}`, false);
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
     const ws = new WebSocket('ws://localhost:8000');
 
     ws.onmessage = (event) => {
-        console.log(event.data);
+        console.log(event.data)
+        const product = getProductById(event.data);
+        console.log(product);
     }
 
     ws.onclose = (event) => {
