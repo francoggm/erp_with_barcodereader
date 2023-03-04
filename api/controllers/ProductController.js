@@ -1,4 +1,11 @@
 const models = require("../database/models");
+const productPostSchema = require("../schema/product/ProductPostSchema.json");
+const productUpdateSchema = require("../schema/product/ProductUpdateSchema.json");
+
+const Ajv = require("ajv");
+const ajv = new Ajv();
+const productPostValidate = ajv.compile(productPostSchema);
+const productUpdateValidate = ajv.compile(productUpdateSchema);
 
 module.exports = {
     getProduct: (req, res) => {
@@ -14,7 +21,7 @@ module.exports = {
             .catch(() => res.status(400).send({error: "Error getting product"}));
     },
 
-    getAllProducts: (req, res, next) => {
+    getAllProducts: (req, res) => {
         models.Product.findAll()
             .then((products) => {
                 res.send(products); 
@@ -22,33 +29,37 @@ module.exports = {
             .catch(() => res.status(400).send({error: "Error getting products"}));
     },
 
-    createProduct: (req, res, next) => {
+    createProduct: (req, res) => {
         const body = req.body;
 
-        if (['name', 'price', 'description', 'quantity'].every(key => Object.keys(body).includes(key))) {
+        if (productPostValidate(body)) {
             return models.Product.create(body)
                 .then((product) => {
                     res.json(product);
                 })
-                .catch(() => res.status(400).send({error: "Error creating products"}));
+                .catch(() => res.status(400).send({error: "Error creating product"}));
         } 
 
-        res.status(400).send({error: "Missing informations"});
+        res.status(400).send({error: "Wrong informations in body, check fields"});
     },
 
     updateProduct: (req, res) => {
         const newProduct = req.body;
         const id = req.params.id;
 
-        models.Product
-            .update(newProduct, {where: {id}})
-            .then(async (product) => {
-                if(product[0])
-                    res.send(await models.Product.findByPk(id));
-                else
-                    res.status(404).send({error: `ID ${id} not found`});
-            })
-            .catch(() => res.status(400).send({error: "Error updating product"}));
+        if(productUpdateValidate(newProduct)){
+            return models.Product
+                .update(newProduct, {where: {id:id}})
+                .then(async (product) => {
+                    if(product[0])
+                        res.send(await models.Product.findByPk(id));
+                    else
+                        res.status(404).send({error: `ID ${id} not found`});
+                })
+                .catch(() => res.status(400).send({error: "Error updating product"}));
+        }
+
+        res.status(400).send({error: "Wrong informations in body, check fields"});
     },
 
     deleteProduct: (req, res) => {

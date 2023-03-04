@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const productRoute = require("./routes/Product");
+const userRoute = require("./routes/User");
+const authRoute = require("./routes/Auth");
 
 const app = express();
 
@@ -16,5 +18,7 @@ app.use((req, res, next) => {
 
 
 app.use("/v1", productRoute);
+app.use("/v1", userRoute);
+app.use("/v1", authRoute);
 
 app.listen(8080, "127.0.0.1", () => console.log("Running"));

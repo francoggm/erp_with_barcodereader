@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "allOf": [{
+        "properties": {
+            "username": {"type": "string", "minLength": 2},
+            "password": {"type": "string", "minLength": 8}
+        },
+        "required": ["username", "password"],
+        "additionalProperties": false
+    }]
+}

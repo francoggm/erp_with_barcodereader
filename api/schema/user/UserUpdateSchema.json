@@ -1,0 +1,9 @@
+{
+    "type": "object",
+    "properties": {
+        "username": {"type": "string", "minLength": 2},
+        "email": {"type": "string", "format": "email"},
+        "admin": {"type": "boolean"}
+    },
+    "additionalProperties": false
+}

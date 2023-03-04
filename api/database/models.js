@@ -2,9 +2,10 @@ const sequelize = require('sequelize');
 const conn = require('./database');
 
 const User = conn.define('user', {
-    name: {
+    username: {
         type: sequelize.STRING(30),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     email: {
         type: sequelize.STRING(80),
