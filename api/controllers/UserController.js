@@ -1,35 +1,64 @@
 const models = require("../database/models");
 const userSchema = require("../schema/user/UserUpdateSchema.json");
+const utils = require("../utils");
 
 const Ajv = require("ajv");
 const addFormats = require("ajv-formats")
+
 const ajv = new Ajv();
 addFormats(ajv);
 const userValidate = ajv.compile(userSchema);
 
 module.exports = {
-    getUser: (req, res) => {
+    getUser: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+        
+        if (tokenData) {
+            const admin = await utils.isAdmin(tokenData.userId);
+            if (!admin) return res.status(401).send({error: "Just admin"});
+        }
+        else {return res.status(401).send({error: "Invalid token"});}
+
         const id = req.params.id;
 
-        models.User.findByPk(id)
+        return models.User.findByPk(id)
             .then((user) => {
                 if(user)
                     res.send(user)
                 else
                     res.status(404).send({error: `ID ${id} not found`});
             })
-            .catch(() => res.status(400).send({error: "Error getting user"}));    
+            .catch(() => res.status(500).send({error: "Error getting user"}));     
     },
 
-    getAllUsers: (req, res, next) => {
+    getAllUsers: async (req, res, next) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+        
+        if (tokenData) {
+            const admin = await utils.isAdmin(tokenData.userId);
+            if (!admin) return res.status(401).send({error: "Just admin"});
+        }
+        else {return res.status(401).send({error: "Invalid token"});}
+
         models.User.findAll()
             .then((users) => {
                 res.send(users); 
             })
-            .catch(() => res.status(400).send({error: "Error getting users"}));    
+            .catch(() => res.status(500).send({error: "Error getting users"}));    
     },
 
-    updateUser: (req, res) => {
+    updateUser: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+        
+        if (tokenData) {
+            const admin = await utils.isAdmin(tokenData.userId, true);
+            if (!admin) return res.status(401).send({error: "Just admin"});
+        }
+        else {return res.status(401).send({error: "Invalid token"});}
+
         const id = req.params.id;
         const newUser = req.body;
 
@@ -42,11 +71,20 @@ module.exports = {
                     else
                         res.status(404).send({error: `ID ${id} not found`});
             })
-            .catch(() => res.status(400).send({error: "Error updating user"}));   
+            .catch(() => res.status(500).send({error: "Error updating user"}));   
         }   
     },
 
-    deleteUser: (req, res) => {
+    deleteUser: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+        
+        if (tokenData) {
+            const admin = await utils.isAdmin(tokenData.userId, true);
+            if (!admin) return res.status(401).send({error: "Just admin"});
+        }
+        else {return res.status(401).send({error: "Invalid token"});}
+        
         const id = req.params.id;
 
         models.User
@@ -57,6 +95,6 @@ module.exports = {
                 else
                     res.status(404).send({error: `ID ${id} not found`});    
             })
-            .catch(() => res.status(400).send({error: "Error deleting user"}));    
+            .catch(() => res.status(500).send({error: "Error deleting user"}));    
     },
 };

@@ -18,7 +18,7 @@ module.exports = {
                 else
                     res.status(404).send({error: `ID ${id} not found`});
             })
-            .catch(() => res.status(400).send({error: "Error getting product"}));
+            .catch(() => res.status(500).send({error: "Error getting product"}));
     },
 
     getAllProducts: (req, res) => {
@@ -26,7 +26,7 @@ module.exports = {
             .then((products) => {
                 res.send(products); 
             })
-            .catch(() => res.status(400).send({error: "Error getting products"}));
+            .catch(() => res.status(500).send({error: "Error getting products"}));
     },
 
     createProduct: (req, res) => {
@@ -37,7 +37,7 @@ module.exports = {
                 .then((product) => {
                     res.json(product);
                 })
-                .catch(() => res.status(400).send({error: "Error creating product"}));
+                .catch(() => res.status(500).send({error: "Error creating product"}));
         } 
 
         res.status(400).send({error: "Wrong informations in body, check fields"});
@@ -56,7 +56,7 @@ module.exports = {
                     else
                         res.status(404).send({error: `ID ${id} not found`});
                 })
-                .catch(() => res.status(400).send({error: "Error updating product"}));
+                .catch(() => res.status(500).send({error: "Error updating product"}));
         }
 
         res.status(400).send({error: "Wrong informations in body, check fields"});
@@ -73,6 +73,6 @@ module.exports = {
                 else
                     res.status(404).send({error: `ID ${id} not found`});    
             })
-            .catch(() => res.status(400).send({error: "Error deleting product"}));
+            .catch(() => res.status(500).send({error: "Error deleting product"}));
     },
 };
