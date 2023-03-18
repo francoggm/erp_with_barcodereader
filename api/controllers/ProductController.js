@@ -1,6 +1,7 @@
 const models = require("../database/models");
 const productPostSchema = require("../schema/product/ProductPostSchema.json");
 const productUpdateSchema = require("../schema/product/ProductUpdateSchema.json");
+const utils = require("../utils");
 
 const Ajv = require("ajv");
 const ajv = new Ajv();
@@ -8,7 +9,16 @@ const productPostValidate = ajv.compile(productPostSchema);
 const productUpdateValidate = ajv.compile(productUpdateSchema);
 
 module.exports = {
-    getProduct: (req, res) => {
+    getProduct: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+
+        if (tokenData) {
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+        }
+        else return res.status(401).send({error: "Invalid token"});
+        
         const id = req.params.id;
 
         models.Product.findByPk(id)
@@ -21,7 +31,16 @@ module.exports = {
             .catch(() => res.status(500).send({error: "Error getting product"}));
     },
 
-    getAllProducts: (req, res) => {
+    getAllProducts: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+
+        if (tokenData) {
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+        }
+        else return res.status(401).send({error: "Invalid token"});
+
         models.Product.findAll()
             .then((products) => {
                 res.send(products); 
@@ -29,7 +48,19 @@ module.exports = {
             .catch(() => res.status(500).send({error: "Error getting products"}));
     },
 
-    createProduct: (req, res) => {
+    createProduct: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+
+        if (tokenData) {
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
+        }
+        else return res.status(401).send({error: "Invalid token"});
+
         const body = req.body;
 
         if (productPostValidate(body)) {
@@ -43,7 +74,19 @@ module.exports = {
         res.status(400).send({error: "Wrong informations in body, check fields"});
     },
 
-    updateProduct: (req, res) => {
+    updateProduct: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+
+        if (tokenData) {
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
+        }
+        else return res.status(401).send({error: "Invalid token"});
+
         const newProduct = req.body;
         const id = req.params.id;
 
@@ -62,7 +105,19 @@ module.exports = {
         res.status(400).send({error: "Wrong informations in body, check fields"});
     },
 
-    deleteProduct: (req, res) => {
+    deleteProduct: async (req, res) => {
+        const token = utils.getToken(req.headers);
+        const tokenData = utils.getTokenData(token);
+
+        if (tokenData) {
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId, true);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
+        }
+        else return res.status(401).send({error: "Invalid token"});
+        
         const id = req.params.id;
 
         models.Product

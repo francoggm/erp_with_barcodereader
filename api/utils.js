@@ -19,8 +19,15 @@ module.exports = {
         return token && token.split(' ')[1];
     },
 
+    isUser: async (userId) => {
+        const user = await models.User.findByPk(userId);
+        return Boolean(user)
+    },
+
     isAdmin: async (userId, superAdmin = false) => {
         const user = await models.User.findByPk(userId);
-        return superAdmin ? user.admin && userId == 1 : user.admin;
+        if (user)
+            return superAdmin ? user.admin && userId == 1 : user.admin;
+        return false;
     }
 }

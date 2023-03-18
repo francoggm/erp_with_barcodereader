@@ -13,15 +13,18 @@ module.exports = {
     getUser: async (req, res) => {
         const token = utils.getToken(req.headers);
         const tokenData = utils.getTokenData(token);
-        
+
         if (tokenData) {
-            const admin = await utils.isAdmin(tokenData.userId);
-            if (!admin) return res.status(401).send({error: "Just admin"});
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
         }
-        else {return res.status(401).send({error: "Invalid token"});}
+        else return res.status(401).send({error: "Invalid token"});
 
         const id = req.params.id;
-
+        
         return models.User.findByPk(id)
             .then((user) => {
                 if(user)
@@ -35,12 +38,15 @@ module.exports = {
     getAllUsers: async (req, res, next) => {
         const token = utils.getToken(req.headers);
         const tokenData = utils.getTokenData(token);
-        
+
         if (tokenData) {
-            const admin = await utils.isAdmin(tokenData.userId);
-            if (!admin) return res.status(401).send({error: "Just admin"});
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
         }
-        else {return res.status(401).send({error: "Invalid token"});}
+        else return res.status(401).send({error: "Invalid token"});
 
         models.User.findAll()
             .then((users) => {
@@ -52,18 +58,21 @@ module.exports = {
     updateUser: async (req, res) => {
         const token = utils.getToken(req.headers);
         const tokenData = utils.getTokenData(token);
-        
+
         if (tokenData) {
-            const admin = await utils.isAdmin(tokenData.userId, true);
-            if (!admin) return res.status(401).send({error: "Just admin"});
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId, true);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
         }
-        else {return res.status(401).send({error: "Invalid token"});}
+        else return res.status(401).send({error: "Invalid token"});
 
         const id = req.params.id;
         const newUser = req.body;
 
         if (userValidate(newUser)) {
-            models.User
+            return models.User
                 .update(newUser, {where: {id}})
                 .then(async (user) => {
                     if(user[0])
@@ -72,18 +81,23 @@ module.exports = {
                         res.status(404).send({error: `ID ${id} not found`});
             })
             .catch(() => res.status(500).send({error: "Error updating user"}));   
-        }   
+        }  
+        
+        res.status(400).send({error: "Wrong informations in body, check fields"});
     },
 
     deleteUser: async (req, res) => {
         const token = utils.getToken(req.headers);
         const tokenData = utils.getTokenData(token);
-        
+
         if (tokenData) {
-            const admin = await utils.isAdmin(tokenData.userId, true);
-            if (!admin) return res.status(401).send({error: "Just admin"});
+            const isUser = await utils.isUser(tokenData.userId)
+            if(!isUser) return res.status(401).send({error: "Invalid token"}); 
+
+            const isAdmin = await utils.isAdmin(tokenData.userId, true);
+            if (!isAdmin) return res.status(401).send({error: "Just admin"});
         }
-        else {return res.status(401).send({error: "Invalid token"});}
+        else return res.status(401).send({error: "Invalid token"});
         
         const id = req.params.id;
 
